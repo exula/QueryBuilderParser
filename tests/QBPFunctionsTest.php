@@ -20,12 +20,12 @@ class QBPFunctionsTests extends CommonQueryBuilderTests
         return $method;
     }
 
-    /**
-     * @expectedException \timgws\QBParseException
-     * @expectedExceptionMessage makeQueryWhenArray could not return a value
-     */
     public function testOperatorNotValid()
     {
+
+        $this->expectException(QBParseException::class);
+        $this->expectExceptionMessage('makeQueryWhenArray could not return a value');
+
         $method = self::getMethod('makeQueryWhenArray');
 
         $builder = $this->createQueryBuilder();
@@ -37,12 +37,12 @@ class QBPFunctionsTests extends CommonQueryBuilderTests
         ]);
     }
 
-    /**
-     * @expectedException \timgws\QBParseException
-     * @expectedExceptionMessage makeQueryWhenNull was called on an SQL operator that is not null
-     */
     public function testOperatorNotValidForNull()
     {
+
+        $this->expectException(QBParseException::class);
+        $this->expectExceptionMessage('makeQueryWhenNull was called on an SQL operator that is not null');
+
         $method = self::getMethod('makeQueryWhenNull');
 
         $builder = $this->createQueryBuilder();

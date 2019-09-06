@@ -3,6 +3,7 @@
 namespace timgws\test;
 
 use Illuminate\Database\Query\Builder;
+use timgws\QBParseException;
 
 class QueryBuilderParserTest extends CommonQueryBuilderTests
 {
@@ -66,12 +67,12 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
         $this->assertEquals('select * where `price` < ? and (`category` not in (?, ?))', $builder->toSql());
     }
 
-    /**
-     * @expectedException \timgws\QBParseException
-     * @expectedExceptionMessage Field (category) should not be an array, but it is.
-     */
     public function testCategoryInvalidArray()
     {
+
+        $this->expectException(QBParseException::class);
+        $this->expectExceptionmessage('Field (category) should not be an array, but it is.');
+
         $builder = $this->createQueryBuilder();
         $qb = $this->getParserUnderTest();
 
@@ -160,11 +161,11 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
         //$this->assertEquals('/* This test currently fails. This should be fixed. */', $builder->toSql());
     }
 
-    /**
-     * @expectedException \timgws\QBParseException
-     */
     public function testJSONParseException()
     {
+
+        $this->expectException(QBParseException::class);
+
         $builder = $this->createQueryBuilder();
         $qb = $this->getParserUnderTest();
 
@@ -328,12 +329,10 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
         $this->beginsOrEndsWithTest('ends', true);
     }
 
-    /**
-     * @expectedException timgws\QBParseException
-     * @expectedMessage Field (price) should not be an array, but it is.
-     */
     public function testInputIsNotArray()
     {
+        $this->expectException(QBParseException::class);
+        $this->expectExceptionMessage('Field (price) should not be an array, but it is.');
         $v = '1.23';
         $json = '{"condition":"AND","rules":['
             .'{"id":"price","field":"price","type":"double","input":"text",'
@@ -359,23 +358,21 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
         $this->assertCount(0, $sqlBindings);
     }
 
-    /**
-     * @expectedException \timgws\QBParseException
-     * @expectedExceptionMessage Field (price) does not exist in fields list
-     */
     public function testFieldNotInittedNotAllowed()
     {
+        $this->getExpectedException(QBParseException::class);
+        $this->expectExceptionMessage('Field (price) does not exist in fields list');
         $builder = $this->createQueryBuilder();
         $qb = $this->getParserUnderTest(array('this_field_is_allowed_but_is_not_present_in_the_json_string'));
         $test = $qb->parse($this->json1, $builder);
     }
 
-    /**
-     * @expectedException \timgws\QBParseException
-     * @expectedExceptionMessage Field (price) should be an array, but it isn't.
-     */
     public function testBetweenMustBeArray($validJSON = true)
     {
+
+        $this->expectException(QBParseException::class);
+        //$this->expectExceptionMessage("Field (price) should be an array, but it isn't");
+
         $json = '{"condition":"AND","rules":['
             .'{"id":"price","field":"price","type":"double","input":"text",'
             .'"operator":"between","value":"1"}]}';
@@ -389,23 +386,23 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
         $test = $qb->parse($json, $builder);
     }
 
-    /**
-     * @expectedException \timgws\QBParseException
-     * @expectedExceptionMessage JSON parsing threw an error
-     */
     public function testThrowExceptionInvalidJSON()
     {
+        $this->expectException(QBParseException::class);
+        $this->expectExceptionMessage('JSON parsing threw an error');
+
         $this->testBetweenMustBeArray(false /*invalid json*/);
     }
 
     /**
      * This is a similar test to testBetweenOperator, however, this will throw an exception if
      * there is more then two values for the 'BETWEEN' operator.
-     *
-     * @expectedException \timgws\QBParseException
      */
     public function testBetweenOperatorThrowsException()
     {
+
+        $this->expectException(QBParseException::class);
+
         $builder = $this->createQueryBuilder();
         $qb = $this->getParserUnderTest();
 
@@ -414,10 +411,12 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
 
     /**
      * @see testBetweenOperatorThrowsException
-     * @expectedException \timgws\QBParseException
      */
     public function testNotBetweenOperatorThrowsException()
     {
+
+        $this->expectException(QBParseException::class);
+
         $builder = $this->createQueryBuilder();
         $qb = $this->getParserUnderTest();
 
@@ -430,10 +429,12 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
      * Make sure an exception is thrown if the JSON is valid, but after parsing,
      * we don't get back an object
      *
-     * @expectedException \timgws\QBParseException
      */
     public function testArrayDoesNotParse()
     {
+
+        $this->expectException(QBParseException::class);
+
         $builder = $this->createQueryBuilder();
         $qb = $this->getParserUnderTest();
 
@@ -536,11 +537,12 @@ class QueryBuilderParserTest extends CommonQueryBuilderTests
 
     /**
      * @throws \timgws\QBParseException
-     * @expectedException \timgws\QBParseException
-     * @expectedExceptionMessage Condition can only be one of: 'and', 'or'.
      */
     public function testIncorrectCondition()
     {
+        $this->expectException(QBParseException::class);
+        $this->expectExceptionMessage("Condition can only be one of: 'and', 'or'");
+
         $json = '{"condition":null,"rules":[
             {"condition":"AXOR","rules":[
                 {"id":"geo_constituency","field":"geo_constituency","type":"string","input":"select","operator":"in","value":["Aberdeen South"]},
